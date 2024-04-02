@@ -96,6 +96,11 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: Text(_data ?? 'data is null'),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.go('/add_counter'),
+        tooltip: 'Add counter',
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }
