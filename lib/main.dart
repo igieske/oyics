@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:oyics/router.dart';
 import 'package:path_provider/path_provider.dart';
 
 void main() {
@@ -12,13 +14,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'OYICS',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: MyHomePage(storage: LocalDataStorage()),
+      routerConfig: appRouter,
     );
   }
 }
