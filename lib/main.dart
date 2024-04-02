@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -64,6 +65,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   String? _data;
+  List<dynamic> _counters = [];
 
   @override
   void initState() {
@@ -71,19 +73,48 @@ class _MyHomePageState extends State<MyHomePage> {
     widget.storage.readLocalData().then((value) {
       setState(() {
         _data = value;
+        if (_data == null) {
+          print('data is null on initState!');
+          return;
+        }
+        Map<String, dynamic> decodedJSON;
+        try {
+          decodedJSON = json.decode(value!) as Map<String, dynamic>;
+        } on FormatException catch (e) {
+          print('! ошибка парсинга json: ${e.message}');
+          print(_data);
+          return;
+        }
+        _counters = decodedJSON['counters'];
       });
     });
   }
 
-  Future<File>? _updateStorage() {
-    setState(() {
-
-    });
-    if (_data == null) {
-      print('data is null on _updateStorage!');
+  Future<File?> _addCounterToStorage(Map<String, dynamic> counterData) async {
+    final String data = _data ?? '{"counters": []}';
+    Map<String, dynamic> decodedJSON;
+    try {
+      decodedJSON = json.decode(data) as Map<String, dynamic>;
+    } on FormatException catch (e) {
+      print('! ошибка парсинга json: ${e.message}');
+      print(data);
       return null;
     }
-    return widget.storage.writeLocalData(_data!);
+    print(decodedJSON);
+    print(decodedJSON['counters']);
+    final List<dynamic> counters = decodedJSON['counters'];
+    print('каунтеров пока: ${counters.length}');
+    counters.add(counterData);
+    print(counters);
+    decodedJSON['counters'] = counters;
+    print(decodedJSON);
+    final String encodedJSON = json.encode(decodedJSON);
+    widget.storage.writeLocalData(encodedJSON);
+    setState(() {
+      _data = encodedJSON;
+      _counters = counters;
+    });
+    return null;
   }
 
   @override
@@ -93,11 +124,32 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('OYICS'),
       ),
-      body: Center(
-        child: Text(_data ?? 'data is null'),
-      ),
+      body: _data == null
+        ? const Center(child: Text('add your firs counter!'))
+        : _counters.isEmpty
+          ? const Center(child: Text('no counters'))
+          : ListView.separated(
+            shrinkWrap: true,
+            separatorBuilder: (_, __) => const Divider(height: 0),
+            itemCount: _counters.length,
+            itemBuilder: (_, int index) {
+              final Map<String, dynamic> counter = _counters[index];
+              return Column(
+                children: [
+                  Text(counter['counterTitle'] ?? 'No title'),
+                  Text(counter['daysToCount'] ?? 'Failed load days to count'),
+                ],
+              );
+            },
+          ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go('/add_counter'),
+        onPressed: () async {
+          final Map<String, dynamic>? addCounterReturn
+            = await context.push('/add_counter');
+          if (addCounterReturn != null) {
+            _addCounterToStorage(addCounterReturn);
+          }
+        },
         tooltip: 'Add counter',
         child: const Icon(Icons.add),
       ),

@@ -12,7 +12,7 @@ class AddCounterPage extends StatefulWidget {
 
 class _AddCounterPageState extends State<AddCounterPage> {
 
-  Map<String, String?> formData = {};
+  Map<String, dynamic> formData = {};
   final _addCounterFormKey = GlobalKey<FormState>();
   final TextEditingController counterTitleController = TextEditingController();
   final TextEditingController daysToCountController = TextEditingController();
