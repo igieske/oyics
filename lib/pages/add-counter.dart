@@ -5,6 +5,14 @@ class AddCounterPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text('add counter page'));
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text('Add counter'),
+      ),
+      body: const Center(
+        child: Text('add counter page'),
+      ),
+    );
   }
 }
